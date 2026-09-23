@@ -1,4 +1,14 @@
-enum TipoConexion { ninguna, red, bluetooth }
+enum TipoConexion {
+  ninguna('Ninguna'),
+
+  /// Sin impresora física: muestra el ticket en pantalla.
+  pantalla('Pantalla'),
+  red('Red'),
+  bluetooth('Bluetooth');
+
+  const TipoConexion(this.etiqueta);
+  final String etiqueta;
+}
 
 class PrinterConfig {
   final TipoConexion conexion;
@@ -25,12 +35,16 @@ class PrinterConfig {
 
   bool get configurada => switch (conexion) {
         TipoConexion.ninguna => false,
+        TipoConexion.pantalla => true,
         TipoConexion.red => ip.isNotEmpty,
         TipoConexion.bluetooth => bluetoothMac.isNotEmpty,
       };
 
+  bool get esPantalla => conexion == TipoConexion.pantalla;
+
   String get descripcion => switch (conexion) {
         TipoConexion.ninguna => 'Sin impresora',
+        TipoConexion.pantalla => 'Vista previa en pantalla',
         TipoConexion.red => 'Red · $ip:$puerto',
         TipoConexion.bluetooth => 'Bluetooth · $bluetoothNombre',
       };

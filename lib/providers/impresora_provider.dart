@@ -3,8 +3,10 @@ import 'package:flutter/foundation.dart';
 import '../data/repositories/config_repository.dart';
 import '../models/printer_config.dart';
 import '../models/venta.dart';
+import '../services/printing/escpos_renderer.dart';
 import '../services/printing/printer_transport.dart';
-import '../services/printing/ticket_builder.dart';
+import '../services/printing/ticket.dart';
+import '../services/printing/ticket_formatter.dart';
 
 class ImpresoraProvider extends ChangeNotifier {
   final ConfigRepository _repo;
@@ -35,35 +37,38 @@ class ImpresoraProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Imprime la comanda de cocina y, si está habilitado, el recibo.
-  Future<void> imprimirVenta(Venta venta, {bool? conRecibo}) async {
-    final builder = TicketBuilder(_config);
-    await _enviar([
-      await builder.comanda(venta),
-      if (conRecibo ?? _config.imprimirRecibo) await builder.recibo(venta),
-    ]);
+  /// Tickets de una venta: comanda y, según configuración, recibo.
+  List<TicketDoc> ticketsVenta(
+    Venta venta, {
+    bool comanda = true,
+    bool? recibo,
+    PrinterConfig? config,
+  }) {
+    final cfg = config ?? _config;
+    final f = TicketFormatter(cfg);
+    return [
+      if (comanda) f.comanda(venta),
+      if (recibo ?? cfg.imprimirRecibo) f.recibo(venta),
+    ];
   }
 
-  Future<void> imprimirRecibo(Venta venta) async =>
-      _enviar([await TicketBuilder(_config).recibo(venta)]);
+  TicketDoc ticketPrueba([PrinterConfig? config]) =>
+      TicketFormatter(config ?? _config).prueba();
 
-  Future<void> imprimirPrueba([PrinterConfig? c]) async {
+  /// Envía los tickets a la impresora física configurada.
+  Future<void> imprimir(List<TicketDoc> tickets, [PrinterConfig? c]) async {
     final cfg = c ?? _config;
-    await _enviar([await TicketBuilder(cfg).prueba()], cfg);
-  }
-
-  Future<void> _enviar(List<List<int>> tickets, [PrinterConfig? c]) async {
-    final cfg = c ?? _config;
-    if (!cfg.configurada) {
-      throw ImpresionException('Configure una impresora en Ajustes');
+    if (!cfg.configurada || cfg.esPantalla) {
+      throw ImpresionException('Configure una impresora física en Admin');
     }
     if (_imprimiendo) throw ImpresionException('Impresión en curso');
     _imprimiendo = true;
     notifyListeners();
     try {
       final transporte = PrinterTransport.desde(cfg);
+      final renderer = EscPosRenderer(cfg.anchoPapel);
       for (final t in tickets) {
-        await transporte.enviar(t);
+        await transporte.enviar(await renderer.render(t));
       }
     } finally {
       _imprimiendo = false;

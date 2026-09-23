@@ -18,8 +18,9 @@ abstract class PrinterTransport {
   factory PrinterTransport.desde(PrinterConfig c) => switch (c.conexion) {
         TipoConexion.red => RedTransport(c.ip, c.puerto),
         TipoConexion.bluetooth => BluetoothTransport(c.bluetoothMac),
-        TipoConexion.ninguna =>
-          throw ImpresionException('No hay impresora configurada'),
+        TipoConexion.ninguna ||
+        TipoConexion.pantalla =>
+          throw ImpresionException('No hay impresora física configurada'),
       };
 }
 
