@@ -1,0 +1,8 @@
+node_modules/
+.wrangler/
+# Variables locales de wrangler dev (pueden contener secretos)
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+*.b64

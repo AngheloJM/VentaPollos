@@ -1,0 +1,13 @@
+{
+  // Configuración pública del Worker. NO poner secretos aquí: el repo es público.
+  // Secretos (Settings -> Variables and Secrets en Cloudflare):
+  //   DATABASE_URL           cadena de conexión de Neon (usuario con permisos limitados)
+  //   LICENCIA_CLAVE_PRIVADA clave Ed25519 PKCS#8 en base64 para firmar los tokens
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ventapollos-licencias",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true }
+}

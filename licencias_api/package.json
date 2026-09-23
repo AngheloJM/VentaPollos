@@ -1,0 +1,21 @@
+{
+  "name": "ventapollos-licencias",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API de activación de licencias de Venta Pollos (Cloudflare Worker + Neon).",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test test/",
+    "claves-firma": "node scripts/generar_claves_firma.mjs",
+    "emitir": "node scripts/emitir_licencia.mjs",
+    "liberar": "node scripts/liberar_dispositivo.mjs"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.136.3"
+  }
+}
