@@ -5,11 +5,13 @@ import 'package:provider/provider.dart';
 import 'app/theme.dart';
 import 'data/repositories/config_repository.dart';
 import 'data/repositories/producto_repository.dart';
+import 'data/repositories/usuario_repository.dart';
 import 'data/repositories/venta_repository.dart';
+import 'providers/auth_provider.dart';
 import 'providers/carrito_provider.dart';
 import 'providers/catalogo_provider.dart';
 import 'providers/impresora_provider.dart';
-import 'screens/home_screen.dart';
+import 'screens/auth/auth_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +25,9 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         Provider.value(value: ventaRepo),
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(UsuarioRepository())..cargar(),
+        ),
         ChangeNotifierProvider(
           create: (_) => CatalogoProvider(productoRepo)..cargar(),
         ),
@@ -45,7 +50,7 @@ class VentaPollosApp extends StatelessWidget {
       title: 'Venta Pollos',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.claro(),
-      home: const HomeScreen(),
+      home: const AuthGate(),
     );
   }
 }
