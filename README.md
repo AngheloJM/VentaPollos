@@ -34,6 +34,7 @@ lib/
 ├── providers/                    # Estado: catálogo, carrito, impresora
 ├── services/
 │   ├── auth/pin_hasher.dart      # Hash de PIN
+│   ├── licencia/                 # Activación y verificación de la licencia
 │   └── printing/
 │       ├── ticket.dart           # Modelo neutral del ticket (líneas, filas, corte)
 │       ├── ticket_formatter.dart # Diseño de comanda, recibo y prueba
@@ -54,8 +55,47 @@ Los montos se guardan como **enteros en centavos** para evitar errores de redond
 
 ```bash
 flutter pub get
-flutter run
+cp config/licencia.example.json config/licencia.json   # y ponga la URL de su API de licencias
+flutter run --dart-define-from-file=config/licencia.json
 ```
+
+`config/licencia.json` no se sube al repositorio. Sin él la app compila, pero no puede activar licencias.
+
+## Licencia de la app
+
+Al primer inicio la app pide una clave (`VP-XXXX-XXXX-XXXX-XXXX`) y la valida **una sola vez** contra
+la API de `licencias_api/`. La respuesta es un token firmado (Ed25519) que se guarda en el celular y
+se verifica **sin internet** en cada inicio. Cuando una beta vence, la app vuelve a pedir licencia;
+los productos y ventas se conservan.
+
+- El celular se identifica por el SHA-256 de su `ANDROID_ID`, que se mantiene al reinstalar la app
+  o borrar sus datos. En Android, ese identificador **depende de la llave con que se firma la app**:
+  cambiar la llave hace que todos los celulares aparezcan como equipos nuevos.
+- Revocar una licencia impide activarla de nuevo, pero un celular ya activado sigue funcionando sin
+  internet hasta que su token venza (así se diseñó para no depender de la red).
+- La pantalla de activación muestra un **ID de equipo** (8 caracteres) que coincide con la columna
+  `equipo` de `npm run liberar`.
+
+## Versión release (para entregar)
+
+1. Llave de firma (una sola vez): `keytool -genkeypair -keystore <ruta-fuera-del-repo>/upload-keystore.jks
+   -storetype PKCS12 -keyalg RSA -keysize 4096 -validity 10000 -alias upload`
+2. `android/key.properties` (no se sube a git):
+   ```properties
+   storePassword=...
+   keyPassword=...
+   keyAlias=upload
+   storeFile=/ruta/absoluta/upload-keystore.jks
+   ```
+3. Compilar:
+   ```bash
+   flutter build apk --release --split-per-abi --dart-define-from-file=config/licencia.json
+   ```
+   Entregue `build/app/outputs/flutter-apk/app-arm64-v8a-release.apk` (celulares actuales) o
+   `app-armeabi-v7a-release.apk` (equipos antiguos de 32 bits).
+
+⚠️ **Respalde la llave y `key.properties` fuera de esta PC.** Sin ellos no podrá publicar
+actualizaciones que se instalen sobre la versión del cliente, y los celulares cambiarían de ID.
 
 ## Permisos (ya aplicados en `android/` e `ios/`)
 
@@ -92,5 +132,5 @@ emulador, añada `--host 127.0.0.1`. Con `--guardar carpeta/` guarda cada ticket
 ## Pendiente / siguientes pasos sugeridos
 
 - Reporte de cierre de caja e impresión del resumen del día.
-- Respaldo/exportación de la base de datos.
+- Servicio de respaldo automático de la base de datos (diario / semanal / mensual).
 - Íconos y splash de la app (`flutter_launcher_icons`, `flutter_native_splash`).
