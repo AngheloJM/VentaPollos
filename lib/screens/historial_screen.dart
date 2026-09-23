@@ -92,7 +92,9 @@ class _Resumen extends StatelessWidget {
     final total = validas.fold(0, (s, v) => s + v.total);
     final porMetodo = {
       for (final m in MetodoPago.values)
-        m: validas.where((v) => v.metodoPago == m).fold(0, (s, v) => s + v.total),
+        m: validas
+            .where((v) => v.metodoPago == m)
+            .fold(0, (s, v) => s + v.total),
     };
 
     return Container(
@@ -110,8 +112,8 @@ class _Resumen extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const Text('Total del día'),
           Text(dinero(total),
-              style: tema.textTheme.headlineMedium?.copyWith(
-                  color: Colors.white, fontWeight: FontWeight.w800)),
+              style: tema.textTheme.headlineMedium
+                  ?.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
           Text('${validas.length} ventas'),
           const SizedBox(height: 12),
@@ -171,8 +173,8 @@ class _VentaTile extends StatelessWidget {
           if (venta.nota != null)
             Align(
               alignment: Alignment.centerLeft,
-              child: Text('Nota: ${venta.nota}',
-                  style: tema.textTheme.bodySmall),
+              child:
+                  Text('Nota: ${venta.nota}', style: tema.textTheme.bodySmall),
             ),
           const SizedBox(height: 8),
           Wrap(spacing: 8, children: [
@@ -209,7 +211,8 @@ class _VentaTile extends StatelessWidget {
       } else {
         await impresora.imprimirVenta(venta, conRecibo: false);
       }
-      messenger.showSnackBar(const SnackBar(content: Text('Enviado a impresora')));
+      messenger
+          .showSnackBar(const SnackBar(content: Text('Enviado a impresora')));
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('$e')));
     }

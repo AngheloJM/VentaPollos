@@ -14,6 +14,5 @@ int? parsearDinero(String texto) {
 }
 
 String fechaHora(DateTime f) => DateFormat('dd/MM/yyyy HH:mm', 'es').format(f);
-String fechaLarga(DateTime f) =>
-    DateFormat("EEEE d 'de' MMMM", 'es').format(f);
+String fechaLarga(DateTime f) => DateFormat("EEEE d 'de' MMMM", 'es').format(f);
 String hora(DateTime f) => DateFormat('HH:mm', 'es').format(f);

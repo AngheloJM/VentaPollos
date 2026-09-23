@@ -277,7 +277,8 @@ class _LineaTile extends StatelessWidget {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar')),
           FilledButton(
               onPressed: () => Navigator.pop(ctx, ctrl.text),
               child: const Text('Guardar')),

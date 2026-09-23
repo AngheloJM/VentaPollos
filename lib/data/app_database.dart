@@ -83,10 +83,14 @@ class AppDatabase {
 
   /// Catálogo de ejemplo; se puede editar desde la pantalla Productos.
   void _datosIniciales(Batch b) {
-    b.insert('categorias', {'id': 1, 'nombre': 'Pollos', 'emoji': '🍗', 'orden': 0});
-    b.insert('categorias', {'id': 2, 'nombre': 'Combos', 'emoji': '🍱', 'orden': 1});
-    b.insert('categorias', {'id': 3, 'nombre': 'Extras', 'emoji': '🍟', 'orden': 2});
-    b.insert('categorias', {'id': 4, 'nombre': 'Bebidas', 'emoji': '🥤', 'orden': 3});
+    b.insert(
+        'categorias', {'id': 1, 'nombre': 'Pollos', 'emoji': '🍗', 'orden': 0});
+    b.insert(
+        'categorias', {'id': 2, 'nombre': 'Combos', 'emoji': '🍱', 'orden': 1});
+    b.insert(
+        'categorias', {'id': 3, 'nombre': 'Extras', 'emoji': '🍟', 'orden': 2});
+    b.insert('categorias',
+        {'id': 4, 'nombre': 'Bebidas', 'emoji': '🥤', 'orden': 3});
 
     const productos = [
       (1, 'Pollo entero', 9000, '🍗'),

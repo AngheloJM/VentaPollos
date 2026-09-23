@@ -49,7 +49,8 @@ class PrinterConfig {
   factory PrinterConfig.fromMap(Map<String, String> m) {
     const d = PrinterConfig();
     return PrinterConfig(
-      conexion: TipoConexion.values.asNameMap()[m['imp_conexion']] ?? d.conexion,
+      conexion:
+          TipoConexion.values.asNameMap()[m['imp_conexion']] ?? d.conexion,
       ip: m['imp_ip'] ?? d.ip,
       puerto: int.tryParse(m['imp_puerto'] ?? '') ?? d.puerto,
       bluetoothMac: m['imp_bt_mac'] ?? d.bluetoothMac,

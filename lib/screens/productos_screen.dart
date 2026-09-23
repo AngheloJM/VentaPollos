@@ -30,7 +30,8 @@ class ProductosScreen extends StatelessWidget {
                   style: tema.textTheme.titleMedium
                       ?.copyWith(fontWeight: FontWeight.w700)),
             ),
-            for (final p in catalogo.productos.where((p) => p.categoriaId == c.id))
+            for (final p
+                in catalogo.productos.where((p) => p.categoriaId == c.id))
               Card(
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
@@ -80,7 +81,20 @@ class _FormProductoState extends State<_FormProducto> {
   late String _emoji = widget.producto?.emoji ?? '🍗';
   late int? _categoriaId = widget.producto?.categoriaId;
 
-  static const _emojis = ['🍗', '🍖', '🐔', '🍱', '🍟', '🍚', '🥗', '🌽', '🥤', '🧃', '🍺', '🍰'];
+  static const _emojis = [
+    '🍗',
+    '🍖',
+    '🐔',
+    '🍱',
+    '🍟',
+    '🍚',
+    '🥗',
+    '🌽',
+    '🥤',
+    '🧃',
+    '🍺',
+    '🍰'
+  ];
 
   @override
   void dispose() {

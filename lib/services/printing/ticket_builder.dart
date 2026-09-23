@@ -151,9 +151,22 @@ class TicketBuilder {
   /// de códigos por defecto; se normaliza el texto a ASCII.
   static String _t(String s) {
     const mapa = {
-      'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u', 'ü': 'u', 'ñ': 'n',
-      'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U', 'Ü': 'U', 'Ñ': 'N',
-      '¡': '!', '¿': '?',
+      'á': 'a',
+      'é': 'e',
+      'í': 'i',
+      'ó': 'o',
+      'ú': 'u',
+      'ü': 'u',
+      'ñ': 'n',
+      'Á': 'A',
+      'É': 'E',
+      'Í': 'I',
+      'Ó': 'O',
+      'Ú': 'U',
+      'Ü': 'U',
+      'Ñ': 'N',
+      '¡': '!',
+      '¿': '?',
     };
     final sb = StringBuffer();
     for (final r in s.runes) {

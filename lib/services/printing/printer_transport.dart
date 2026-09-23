@@ -33,8 +33,8 @@ class RedTransport implements PrinterTransport {
   Future<void> enviar(List<int> bytes) async {
     Socket? socket;
     try {
-      socket = await Socket.connect(ip, puerto,
-          timeout: const Duration(seconds: 5));
+      socket =
+          await Socket.connect(ip, puerto, timeout: const Duration(seconds: 5));
       socket.add(bytes);
       await socket.flush();
     } on SocketException catch (e) {

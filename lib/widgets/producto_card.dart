@@ -13,8 +13,8 @@ class ProductoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
-    final cantidad = context.select<CarritoProvider, int>(
-        (c) => c.cantidadDe(producto));
+    final cantidad =
+        context.select<CarritoProvider, int>((c) => c.cantidadDe(producto));
 
     return Card(
       clipBehavior: Clip.antiAlias,

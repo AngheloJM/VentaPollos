@@ -3,7 +3,8 @@ class Categoria {
   final String nombre;
   final String emoji;
 
-  const Categoria({required this.id, required this.nombre, required this.emoji});
+  const Categoria(
+      {required this.id, required this.nombre, required this.emoji});
 
   factory Categoria.fromMap(Map<String, Object?> m) => Categoria(
         id: m['id'] as int,
