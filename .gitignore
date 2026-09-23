@@ -35,3 +35,11 @@ ios/Flutter/flutter_export_environment.sh
 .env
 .env.*
 *.db
+
+# Configuración local de compilación (dirección del servidor de licencias)
+config/*.json
+!config/*.example.json
+
+# Firma de la app (nunca subir)
+android/app/*.jks
+android/app/upload-keystore*
