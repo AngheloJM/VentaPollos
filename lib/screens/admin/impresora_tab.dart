@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:provider/provider.dart';
 
-import '../models/printer_config.dart';
-import '../providers/impresora_provider.dart';
-import '../services/printing/printer_transport.dart';
+import '../../models/printer_config.dart';
+import '../../providers/impresora_provider.dart';
+import '../../services/printing/printer_transport.dart';
+import '../../widgets/ticket_preview.dart';
 
-class AjustesScreen extends StatefulWidget {
-  const AjustesScreen({super.key});
+class ImpresoraTab extends StatefulWidget {
+  const ImpresoraTab({super.key});
 
   @override
-  State<AjustesScreen> createState() => _AjustesScreenState();
+  State<ImpresoraTab> createState() => _ImpresoraTabState();
 }
 
-class _AjustesScreenState extends State<AjustesScreen> {
+class _ImpresoraTabState extends State<ImpresoraTab> {
   late final ImpresoraProvider _impresora = context.read<ImpresoraProvider>();
   late PrinterConfig _cfg = _impresora.config;
   late final _negocio = TextEditingController(text: _cfg.nombreNegocio);
@@ -82,12 +83,19 @@ class _AjustesScreenState extends State<AjustesScreen> {
   }
 
   Future<void> _probar() async {
+    final cfg = _formulario;
     try {
-      await _impresora.imprimirPrueba(_formulario);
+      await _impresora.imprimir([_impresora.ticketPrueba(cfg)], cfg);
       _aviso('Prueba enviada');
     } catch (e) {
       _aviso('$e');
     }
+  }
+
+  void _vistaPrevia() {
+    final cfg = _formulario;
+    mostrarVistaPrevia(context, [_impresora.ticketPrueba(cfg)],
+        anchoPapel: cfg.anchoPapel);
   }
 
   void _aviso(String m) {
@@ -101,7 +109,6 @@ class _AjustesScreenState extends State<AjustesScreen> {
     final imprimiendo = context.watch<ImpresoraProvider>().imprimiendo;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ajustes')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -120,25 +127,31 @@ class _AjustesScreenState extends State<AjustesScreen> {
             titulo: 'Impresora térmica',
             icono: Icons.print_outlined,
             children: [
-              SegmentedButton<TipoConexion>(
-                segments: const [
-                  ButtonSegment(
-                      value: TipoConexion.ninguna,
-                      icon: Icon(Icons.print_disabled_outlined),
-                      label: Text('Ninguna')),
-                  ButtonSegment(
-                      value: TipoConexion.red,
-                      icon: Icon(Icons.wifi),
-                      label: Text('Red')),
-                  ButtonSegment(
-                      value: TipoConexion.bluetooth,
-                      icon: Icon(Icons.bluetooth),
-                      label: Text('Bluetooth')),
-                ],
-                selected: {_cfg.conexion},
-                onSelectionChanged: (s) =>
-                    setState(() => _cfg = _cfg.copyWith(conexion: s.first)),
-              ),
+              Wrap(spacing: 8, runSpacing: 8, children: [
+                for (final (tipo, icono) in const [
+                  (TipoConexion.ninguna, Icons.print_disabled_outlined),
+                  (TipoConexion.pantalla, Icons.visibility_outlined),
+                  (TipoConexion.red, Icons.wifi),
+                  (TipoConexion.bluetooth, Icons.bluetooth),
+                ])
+                  ChoiceChip(
+                    avatar: Icon(icono, size: 18),
+                    label: Text(tipo.etiqueta),
+                    selected: _cfg.conexion == tipo,
+                    showCheckmark: false,
+                    onSelected: (_) =>
+                        setState(() => _cfg = _cfg.copyWith(conexion: tipo)),
+                  ),
+              ]),
+              if (_cfg.esPantalla)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(
+                    'Modo prueba: al cobrar se muestra la comanda en pantalla '
+                    'tal como saldría impresa, sin enviarla a ninguna impresora.',
+                    style: tema.textTheme.bodySmall,
+                  ),
+                ),
               const SizedBox(height: 16),
               if (_cfg.conexion == TipoConexion.red) ...[
                 TextField(
@@ -220,11 +233,25 @@ class _AjustesScreenState extends State<AjustesScreen> {
                       setState(() => _cfg = _cfg.copyWith(imprimirRecibo: v)),
                 ),
                 const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  onPressed: imprimiendo ? null : _probar,
-                  icon: const Icon(Icons.receipt_outlined),
-                  label: const Text('Imprimir prueba'),
-                ),
+                Row(children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _vistaPrevia,
+                      icon: const Icon(Icons.visibility_outlined),
+                      label: const Text('Vista previa'),
+                    ),
+                  ),
+                  if (!_cfg.esPantalla) ...[
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: imprimiendo ? null : _probar,
+                        icon: const Icon(Icons.receipt_outlined),
+                        label: const Text('Imprimir prueba'),
+                      ),
+                    ),
+                  ],
+                ]),
               ],
             ],
           ),
