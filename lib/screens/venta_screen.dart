@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/carrito_provider.dart';
 import '../providers/catalogo_provider.dart';
+import '../providers/licencia_provider.dart';
 import '../utils/formato.dart';
 import '../widgets/boton_sesion.dart';
 import '../widgets/carrito_panel.dart';
@@ -99,6 +100,7 @@ class _Catalogo extends StatelessWidget {
                 Text(fechaLarga(DateTime.now()),
                     style: tema.textTheme.bodySmall
                         ?.copyWith(color: tema.colorScheme.outline)),
+                const _AvisoBeta(),
               ],
             ),
             const Spacer(),
@@ -210,6 +212,39 @@ class _BarraCarrito extends StatelessWidget {
         initialChildSize: 0.9,
         minChildSize: 0.5,
         builder: (_, __) => const CarritoPanel(cerrarAlCobrar: true),
+      ),
+    );
+  }
+}
+
+/// Recordatorio discreto de los días que le quedan a la licencia beta.
+class _AvisoBeta extends StatelessWidget {
+  const _AvisoBeta();
+
+  @override
+  Widget build(BuildContext context) {
+    final licencia = context.watch<LicenciaProvider>();
+    final dias = licencia.diasRestantes;
+    if (licencia.licencia?.esBeta != true || dias == null) {
+      return const SizedBox.shrink();
+    }
+    final urgente = dias <= 3;
+    final esquema = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: urgente ? esquema.errorContainer : esquema.secondaryContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        dias == 1 ? 'Beta · vence mañana' : 'Beta · $dias días restantes',
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color:
+              urgente ? esquema.onErrorContainer : esquema.onSecondaryContainer,
+        ),
       ),
     );
   }

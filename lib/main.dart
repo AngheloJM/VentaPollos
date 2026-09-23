@@ -11,7 +11,9 @@ import 'providers/auth_provider.dart';
 import 'providers/carrito_provider.dart';
 import 'providers/catalogo_provider.dart';
 import 'providers/impresora_provider.dart';
+import 'providers/licencia_provider.dart';
 import 'screens/auth/auth_gate.dart';
+import 'services/licencia/licencia_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +27,10 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         Provider.value(value: ventaRepo),
+        ChangeNotifierProvider(
+          create: (_) =>
+              LicenciaProvider(LicenciaService(configRepo))..cargar(),
+        ),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(UsuarioRepository())..cargar(),
         ),

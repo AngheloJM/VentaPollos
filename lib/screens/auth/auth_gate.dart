@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
+import '../../providers/licencia_provider.dart';
 import '../home_screen.dart';
+import 'activacion_screen.dart';
 import 'configuracion_inicial_screen.dart';
 import 'login_screen.dart';
 
@@ -12,10 +14,13 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final licencia = context.watch<LicenciaProvider>();
     final auth = context.watch<AuthProvider>();
-    if (auth.cargando) {
+    if (licencia.estado == EstadoLicencia.cargando || auth.cargando) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+    // Sin licencia vigente no se puede usar la app (los datos se conservan).
+    if (!licencia.activa) return const ActivacionScreen();
     if (auth.requiereConfiguracion) return const ConfiguracionInicialScreen();
     final usuario = auth.actual;
     if (usuario == null) return const LoginScreen();
