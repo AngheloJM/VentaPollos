@@ -66,7 +66,8 @@ class _AjustesScreenState extends State<AjustesScreen> {
       final lista = await BluetoothTransport.vinculadas();
       setState(() => _dispositivos = lista);
       if (lista.isEmpty) {
-        _aviso('No hay impresoras vinculadas. Vincúlela primero en los ajustes del teléfono.');
+        _aviso(
+            'No hay impresoras vinculadas. Vincúlela primero en los ajustes del teléfono.');
       }
     } catch (e) {
       _aviso('Error buscando dispositivos: $e');
@@ -110,8 +111,8 @@ class _AjustesScreenState extends State<AjustesScreen> {
             children: [
               TextField(
                 controller: _negocio,
-                decoration: const InputDecoration(
-                    labelText: 'Nombre en el recibo'),
+                decoration:
+                    const InputDecoration(labelText: 'Nombre en el recibo'),
               ),
             ],
           ),
@@ -178,16 +179,24 @@ class _AjustesScreenState extends State<AjustesScreen> {
                       : const Icon(Icons.search),
                   label: const Text('Buscar impresoras vinculadas'),
                 ),
-                for (final d in _dispositivos)
-                  RadioListTile<String>(
-                    contentPadding: EdgeInsets.zero,
-                    value: d.macAdress,
-                    groupValue: _cfg.bluetoothMac,
-                    title: Text(d.name),
-                    subtitle: Text(d.macAdress),
-                    onChanged: (_) => setState(() => _cfg = _cfg.copyWith(
-                        bluetoothMac: d.macAdress, bluetoothNombre: d.name)),
-                  ),
+                RadioGroup<String>(
+                  groupValue: _cfg.bluetoothMac,
+                  onChanged: (mac) {
+                    final d =
+                        _dispositivos.firstWhere((x) => x.macAdress == mac);
+                    setState(() => _cfg = _cfg.copyWith(
+                        bluetoothMac: d.macAdress, bluetoothNombre: d.name));
+                  },
+                  child: Column(children: [
+                    for (final d in _dispositivos)
+                      RadioListTile<String>(
+                        contentPadding: EdgeInsets.zero,
+                        value: d.macAdress,
+                        title: Text(d.name),
+                        subtitle: Text(d.macAdress),
+                      ),
+                  ]),
+                ),
               ],
               if (_cfg.conexion != TipoConexion.ninguna) ...[
                 const SizedBox(height: 16),
@@ -245,7 +254,8 @@ class _Seccion extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
             Icon(icono, color: tema.colorScheme.primary),
             const SizedBox(width: 8),
