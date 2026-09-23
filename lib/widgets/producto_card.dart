@@ -25,15 +25,15 @@ class ProductoCard extends StatelessWidget {
         },
         child: Stack(children: [
           Padding(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Center(
                     child: Container(
-                      width: 72,
-                      height: 72,
+                      width: 54,
+                      height: 54,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: tema.colorScheme.primaryContainer
@@ -41,22 +41,22 @@ class ProductoCard extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: Text(producto.emoji,
-                          style: const TextStyle(fontSize: 38)),
+                          style: const TextStyle(fontSize: 28)),
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   producto.nombre,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: tema.textTheme.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w600),
+                  style: tema.textTheme.bodyMedium
+                      ?.copyWith(fontWeight: FontWeight.w600, height: 1.2),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   dinero(producto.precio),
-                  style: tema.textTheme.titleMedium?.copyWith(
+                  style: tema.textTheme.titleSmall?.copyWith(
                     color: tema.colorScheme.primary,
                     fontWeight: FontWeight.w700,
                   ),
@@ -66,11 +66,10 @@ class ProductoCard extends StatelessWidget {
           ),
           if (cantidad > 0)
             Positioned(
-              top: 10,
-              right: 10,
+              top: 6,
+              right: 6,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: tema.colorScheme.primary,
                   borderRadius: BorderRadius.circular(20),

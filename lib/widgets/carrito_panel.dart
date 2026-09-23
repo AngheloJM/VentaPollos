@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 
 import '../data/repositories/venta_repository.dart';
 import '../models/venta.dart';
+import '../providers/auth_provider.dart';
 import '../providers/carrito_provider.dart';
 import '../providers/impresora_provider.dart';
 import '../utils/formato.dart';
+import 'ticket_preview.dart';
 
 class CarritoPanel extends StatefulWidget {
   /// En teléfono el panel vive en un bottom sheet que se cierra al cobrar.
@@ -169,19 +171,22 @@ class _CarritoPanelState extends State<CarritoPanel> {
     final navigator = Navigator.of(context);
     final ventas = context.read<VentaRepository>();
     final impresora = context.read<ImpresoraProvider>();
+    final usuario = context.read<AuthProvider>().actual!;
+    // Contexto estable para la vista previa (el panel puede cerrarse).
+    final contextoRaiz = Navigator.of(context, rootNavigator: true).context;
 
     setState(() => _procesando = true);
     try {
       // Primero se persiste: si la impresión falla, la venta no se pierde.
-      final venta = await ventas.registrar(_carrito.aVenta());
+      final venta = await ventas.registrar(_carrito.aVenta(usuario));
       _limpiar();
       if (widget.cerrarAlCobrar) navigator.pop();
 
       String mensaje = 'Venta #${venta.id} registrada · ${dinero(venta.total)}';
-      if (impresora.config.configurada) {
+      if (impresora.config.configurada && contextoRaiz.mounted) {
         try {
-          await impresora.imprimirVenta(venta);
-          mensaje += ' · Comanda impresa';
+          await imprimirOMostrar(contextoRaiz, impresora.ticketsVenta(venta));
+          if (!impresora.config.esPantalla) mensaje += ' · Comanda impresa';
         } catch (e) {
           mensaje += ' · No se imprimió: $e';
         }
@@ -265,27 +270,50 @@ class _LineaTile extends StatelessWidget {
 
   Future<void> _editarNota(BuildContext context) async {
     final carrito = context.read<CarritoProvider>();
-    final ctrl = TextEditingController(text: linea.nota);
     final texto = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Nota: ${linea.producto.nombre}'),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          decoration: const InputDecoration(hintText: 'Ej: pierna, sin ají'),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar')),
-          FilledButton(
-              onPressed: () => Navigator.pop(ctx, ctrl.text),
-              child: const Text('Guardar')),
-        ],
-      ),
+      builder: (_) =>
+          _DialogoNota(titulo: linea.producto.nombre, inicial: linea.nota),
     );
-    ctrl.dispose();
     if (texto != null) carrito.ponerNota(linea, texto);
+  }
+}
+
+class _DialogoNota extends StatefulWidget {
+  final String titulo;
+  final String? inicial;
+  const _DialogoNota({required this.titulo, this.inicial});
+
+  @override
+  State<_DialogoNota> createState() => _DialogoNotaState();
+}
+
+class _DialogoNotaState extends State<_DialogoNota> {
+  late final _ctrl = TextEditingController(text: widget.inicial);
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Nota: ${widget.titulo}'),
+      content: TextField(
+        controller: _ctrl,
+        autofocus: true,
+        decoration: const InputDecoration(hintText: 'Ej: pierna, sin ají'),
+      ),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar')),
+        FilledButton(
+            onPressed: () => Navigator.pop(context, _ctrl.text),
+            child: const Text('Guardar')),
+      ],
+    );
   }
 }

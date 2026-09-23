@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 
 import '../data/repositories/venta_repository.dart';
 import '../models/venta.dart';
+import '../providers/auth_provider.dart';
 import '../providers/impresora_provider.dart';
 import '../utils/formato.dart';
+import '../widgets/ticket_preview.dart';
 
 class HistorialScreen extends StatefulWidget {
   const HistorialScreen({super.key});
@@ -149,11 +151,12 @@ class _VentaTile extends StatelessWidget {
           child: Text(venta.tipo.emoji),
         ),
         title: Text(
-          '#${venta.id}  ${venta.referencia ?? venta.tipo.etiqueta}',
+          '#${venta.id}  ${_titulo(venta)}',
           style: tachado,
         ),
         subtitle: Text(
           '${hora(venta.fecha)} · ${venta.unidades} ítems · ${venta.metodoPago.etiqueta}'
+          '${venta.usuarioNombre != null ? ' · ${venta.usuarioNombre}' : ''}'
           '${venta.anulada ? ' · ANULADA' : ''}',
         ),
         trailing: Text(dinero(venta.total),
@@ -161,13 +164,17 @@ class _VentaTile extends StatelessWidget {
                 ?.copyWith(fontWeight: FontWeight.w700)
                 .merge(tachado)),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (final i in venta.items)
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
               title: Text('${i.cantidad} x ${i.nombre}'),
-              subtitle: i.nota != null ? Text(i.nota!) : null,
+              subtitle: (i.descripcion ?? i.nota) != null
+                  ? Text(
+                      [i.descripcion, i.nota].whereType<String>().join(' · '))
+                  : null,
               trailing: Text(dinero(i.subtotal)),
             ),
           if (venta.nota != null)
@@ -177,7 +184,17 @@ class _VentaTile extends StatelessWidget {
                   Text('Nota: ${venta.nota}', style: tema.textTheme.bodySmall),
             ),
           const SizedBox(height: 8),
-          Wrap(spacing: 8, children: [
+          Wrap(spacing: 8, runSpacing: 4, children: [
+            FilledButton.tonalIcon(
+              onPressed: () => mostrarVistaPrevia(
+                context,
+                context
+                    .read<ImpresoraProvider>()
+                    .ticketsVenta(venta, recibo: true),
+              ),
+              icon: const Icon(Icons.visibility_outlined),
+              label: const Text('Ver ticket'),
+            ),
             OutlinedButton.icon(
               onPressed: () => _imprimir(context, recibo: false),
               icon: const Icon(Icons.restaurant),
@@ -188,7 +205,7 @@ class _VentaTile extends StatelessWidget {
               icon: const Icon(Icons.receipt),
               label: const Text('Recibo'),
             ),
-            if (!venta.anulada)
+            if (!venta.anulada && context.read<AuthProvider>().esAdmin)
               TextButton.icon(
                 onPressed: () => _anular(context),
                 icon: const Icon(Icons.block),
@@ -202,17 +219,24 @@ class _VentaTile extends StatelessWidget {
     );
   }
 
+  static String _titulo(Venta v) => switch ((v.tipo, v.referencia)) {
+        (TipoPedido.mesa, final String r) => 'Mesa $r',
+        (_, final String r) => r,
+        (final t, null) => t.etiqueta,
+      };
+
   Future<void> _imprimir(BuildContext context, {required bool recibo}) async {
     final messenger = ScaffoldMessenger.of(context);
     final impresora = context.read<ImpresoraProvider>();
     try {
-      if (recibo) {
-        await impresora.imprimirRecibo(venta);
-      } else {
-        await impresora.imprimirVenta(venta, conRecibo: false);
+      await imprimirOMostrar(
+        context,
+        impresora.ticketsVenta(venta, comanda: !recibo, recibo: recibo),
+      );
+      if (!impresora.config.esPantalla) {
+        messenger
+            .showSnackBar(const SnackBar(content: Text('Enviado a impresora')));
       }
-      messenger
-          .showSnackBar(const SnackBar(content: Text('Enviado a impresora')));
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('$e')));
     }

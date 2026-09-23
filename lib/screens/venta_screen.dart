@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/carrito_provider.dart';
 import '../providers/catalogo_provider.dart';
 import '../utils/formato.dart';
+import '../widgets/boton_sesion.dart';
 import '../widgets/carrito_panel.dart';
 import '../widgets/producto_card.dart';
 
@@ -100,6 +101,8 @@ class _Catalogo extends StatelessWidget {
                         ?.copyWith(color: tema.colorScheme.outline)),
               ],
             ),
+            const Spacer(),
+            const BotonSesion(),
           ]),
         ),
         SingleChildScrollView(
@@ -117,10 +120,10 @@ class _Catalogo extends StatelessWidget {
               : GridView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 200,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 0.9,
+                    maxCrossAxisExtent: 160,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    childAspectRatio: 0.82,
                   ),
                   itemCount: productos.length,
                   itemBuilder: (_, i) => ProductoCard(producto: productos[i]),
