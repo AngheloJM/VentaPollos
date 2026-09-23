@@ -85,7 +85,7 @@ export async function manejarActivacion(request, { repo, clavePrivada, ahora = (
     {
       v: 1,
       prod: producto,
-      lic: licencia.id,
+      lic: Number(licencia.id), // BIGINT llega como texto desde PostgreSQL
       tipo: licencia.tipo,
       disp: dispositivo,
       clave: claveHash,

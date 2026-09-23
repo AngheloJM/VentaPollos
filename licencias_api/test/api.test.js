@@ -24,8 +24,8 @@ async function clavesDePrueba() {
 /** Simula Neon con la misma interfaz que src/repositorio.js. */
 async function repoFalso() {
   const licencias = [
-    { id: 1, producto: 'venta_pollos', clave_hash: await sha256Hex(CLAVE_BETA), tipo: 'beta', max_dispositivos: 1, dias_validez: 15, estado: 'activa' },
-    { id: 2, producto: 'venta_pollos', clave_hash: await sha256Hex(CLAVE_FULL), tipo: 'completa', max_dispositivos: 1, dias_validez: null, estado: 'activa' },
+    { id: '1', producto: 'venta_pollos', clave_hash: await sha256Hex(CLAVE_BETA), tipo: 'beta', max_dispositivos: 1, dias_validez: 15, estado: 'activa' },
+    { id: '2', producto: 'venta_pollos', clave_hash: await sha256Hex(CLAVE_FULL), tipo: 'completa', max_dispositivos: 1, dias_validez: null, estado: 'activa' },
   ];
   const activaciones = [];
   const intentos = [];
@@ -107,6 +107,7 @@ describe('POST /v1/activar', async () => {
     assert.equal(r.cuerpo.codigo, 'activada');
     const contenido = await verificarToken(r.cuerpo.token, claves.publica);
     assert.equal(contenido.tipo, 'beta');
+    assert.equal(contenido.lic, 1, 'lic debe ser número aunque PostgreSQL entregue BIGINT como texto');
     assert.equal(contenido.disp, CEL_A);
     assert.equal(contenido.clave, await sha256Hex(CLAVE_BETA));
     assert.equal(contenido.exp, Math.floor((T0.getTime() + 15 * DIA) / 1000));
