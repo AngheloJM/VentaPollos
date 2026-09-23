@@ -16,15 +16,22 @@ class ConfigRepository {
     });
   }
 
-  Future<void> guardarImpresora(PrinterConfig config) async {
+  Future<void> guardarImpresora(PrinterConfig config) =>
+      escribir(config.toMap());
+
+  Future<String?> leer(String clave) async {
+    final db = await _app.database;
+    final filas = await db.query('configuracion',
+        where: 'clave = ?', whereArgs: [clave], limit: 1);
+    return filas.isEmpty ? null : filas.first['valor'] as String;
+  }
+
+  Future<void> escribir(Map<String, String> valores) async {
     final db = await _app.database;
     final batch = db.batch();
-    config.toMap().forEach((clave, valor) {
-      batch.insert(
-        'configuracion',
-        {'clave': clave, 'valor': valor},
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+    valores.forEach((clave, valor) {
+      batch.insert('configuracion', {'clave': clave, 'valor': valor},
+          conflictAlgorithm: ConflictAlgorithm.replace);
     });
     await batch.commit(noResult: true);
   }

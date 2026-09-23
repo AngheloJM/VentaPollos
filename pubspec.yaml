@@ -25,8 +25,12 @@ dependencies:
   esc_pos_utils_plus: ^2.0.4
   print_bluetooth_thermal: ^1.1.6
 
-  # Seguridad (hash de PIN)
+  # Seguridad (hash de PIN, verificación de licencia)
   crypto: ^3.0.7
+  cryptography: ^2.9.0
+
+  # Activación de licencia
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:
