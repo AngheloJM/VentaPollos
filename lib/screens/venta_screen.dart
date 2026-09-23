@@ -102,17 +102,14 @@ class _Catalogo extends StatelessWidget {
             ),
           ]),
         ),
-        SizedBox(
-          height: 56,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            children: [
-              _chip(context, 'Todo', '✨', null),
-              for (final c in catalogo.categorias)
-                _chip(context, c.nombre, c.emoji, c.id),
-            ],
-          ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(children: [
+            _chip(context, 'Todo', '✨', null),
+            for (final c in catalogo.categorias)
+              _chip(context, c.nombre, c.emoji, c.id),
+          ]),
         ),
         Expanded(
           child: productos.isEmpty
@@ -138,7 +135,8 @@ class _Catalogo extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: ChoiceChip(
-        label: Text('$emoji  $texto'),
+        avatar: Text(emoji),
+        label: Text(texto),
         selected: seleccionado,
         showCheckmark: false,
         onSelected: (_) => onCategoria(id),
