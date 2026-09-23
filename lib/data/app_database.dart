@@ -7,7 +7,7 @@ class AppDatabase {
   static final AppDatabase instance = AppDatabase._();
 
   static const _archivo = 'venta_pollos.db';
-  static const _version = 1;
+  static const _version = 2;
 
   Database? _db;
 
@@ -19,12 +19,18 @@ class AppDatabase {
       ruta,
       version: _version,
       onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
-      onCreate: _crear,
-      // onUpgrade: agregar migraciones aquí al subir _version.
+      onCreate: (db, _) async {
+        await _v1(db);
+        await _v2(db);
+      },
+      // Migraciones incrementales: conservan los datos ya registrados.
+      onUpgrade: (db, anterior, _) async {
+        if (anterior < 2) await _v2(db);
+      },
     );
   }
 
-  Future<void> _crear(Database db, int version) async {
+  Future<void> _v1(Database db) async {
     final batch = db.batch();
 
     batch.execute('''
@@ -79,6 +85,35 @@ class AppDatabase {
 
     _datosIniciales(batch);
     await batch.commit(noResult: true);
+  }
+
+  /// v2: usuarios con PIN, contenido de combos y usuario en cada venta.
+  Future<void> _v2(Database db) async {
+    final b = db.batch();
+    b.execute('ALTER TABLE productos ADD COLUMN descripcion TEXT');
+    b.execute('ALTER TABLE venta_items ADD COLUMN descripcion TEXT');
+    b.execute('ALTER TABLE ventas ADD COLUMN usuario_id INTEGER');
+    b.execute('ALTER TABLE ventas ADD COLUMN usuario_nombre TEXT');
+    b.execute('''
+      CREATE TABLE usuarios(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL UNIQUE COLLATE NOCASE,
+        rol TEXT NOT NULL,
+        pin_hash TEXT NOT NULL,
+        pin_salt TEXT NOT NULL,
+        iteraciones INTEGER NOT NULL,
+        activo INTEGER NOT NULL DEFAULT 1,
+        creado TEXT NOT NULL
+      )''');
+    b.update(
+        'productos', {'descripcion': '1 pollo + papas familiares + gaseosa 2L'},
+        where: 'nombre = ? AND descripcion IS NULL',
+        whereArgs: ['Combo familiar']);
+    b.update('productos',
+        {'descripcion': '1/4 pollo + papas + arroz + gaseosa personal'},
+        where: 'nombre = ? AND descripcion IS NULL',
+        whereArgs: ['Combo personal']);
+    await b.commit(noResult: true);
   }
 
   /// Catálogo de ejemplo; se puede editar desde la pantalla Productos.

@@ -20,6 +20,9 @@ enum MetodoPago {
 class VentaItem {
   final int? productoId;
   final String nombre;
+
+  /// Contenido del combo al momento de la venta.
+  final String? descripcion;
   final int precio;
   final int cantidad;
   final String? nota;
@@ -27,6 +30,7 @@ class VentaItem {
   const VentaItem({
     this.productoId,
     required this.nombre,
+    this.descripcion,
     required this.precio,
     required this.cantidad,
     this.nota,
@@ -37,6 +41,7 @@ class VentaItem {
   factory VentaItem.fromMap(Map<String, Object?> m) => VentaItem(
         productoId: m['producto_id'] as int?,
         nombre: m['nombre'] as String,
+        descripcion: m['descripcion'] as String?,
         precio: m['precio'] as int,
         cantidad: m['cantidad'] as int,
         nota: m['nota'] as String?,
@@ -46,6 +51,7 @@ class VentaItem {
         'venta_id': ventaId,
         'producto_id': productoId,
         'nombre': nombre,
+        'descripcion': descripcion,
         'precio': precio,
         'cantidad': cantidad,
         'nota': nota,
@@ -64,6 +70,10 @@ class Venta {
   final List<VentaItem> items;
   final bool anulada;
 
+  /// Quién registró la venta (se copia el nombre por si luego cambia).
+  final int? usuarioId;
+  final String? usuarioNombre;
+
   const Venta({
     this.id,
     required this.fecha,
@@ -73,6 +83,8 @@ class Venta {
     required this.metodoPago,
     required this.items,
     this.anulada = false,
+    this.usuarioId,
+    this.usuarioNombre,
   });
 
   int get total => items.fold(0, (s, i) => s + i.subtotal);
@@ -86,6 +98,8 @@ class Venta {
         nota: m['nota'] as String?,
         metodoPago: MetodoPago.values.byName(m['metodo_pago'] as String),
         anulada: (m['anulada'] as int) == 1,
+        usuarioId: m['usuario_id'] as int?,
+        usuarioNombre: m['usuario_nombre'] as String?,
         items: items,
       );
 
@@ -98,6 +112,8 @@ class Venta {
         'metodo_pago': metodoPago.name,
         'total': total,
         'anulada': anulada ? 1 : 0,
+        'usuario_id': usuarioId,
+        'usuario_nombre': usuarioNombre,
       };
 
   Venta conId(int nuevoId) => Venta(
@@ -109,5 +125,7 @@ class Venta {
         metodoPago: metodoPago,
         items: items,
         anulada: anulada,
+        usuarioId: usuarioId,
+        usuarioNombre: usuarioNombre,
       );
 }

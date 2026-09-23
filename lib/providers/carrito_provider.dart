@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/producto.dart';
+import '../models/usuario.dart';
 import '../models/venta.dart';
 
 class LineaCarrito {
@@ -64,8 +65,10 @@ class CarritoProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Venta aVenta() => Venta(
+  Venta aVenta(Usuario usuario) => Venta(
         fecha: DateTime.now(),
+        usuarioId: usuario.id,
+        usuarioNombre: usuario.nombre,
         tipo: tipo,
         referencia: referencia.trim().isEmpty ? null : referencia.trim(),
         nota: nota.trim().isEmpty ? null : nota.trim(),
@@ -75,6 +78,7 @@ class CarritoProvider extends ChangeNotifier {
             VentaItem(
               productoId: l.producto.id,
               nombre: l.producto.nombre,
+              descripcion: l.producto.descripcion,
               precio: l.producto.precio,
               cantidad: l.cantidad,
               nota: l.nota,
