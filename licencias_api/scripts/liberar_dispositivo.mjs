@@ -34,7 +34,7 @@ try {
   }
 
   const { rows } = await pool.query(
-    `SELECT a.id, a.estado, a.modelo, a.version_app,
+    `SELECT a.id, upper(left(a.dispositivo_hash, 8)) AS equipo, a.estado, a.modelo, a.version_app,
             to_char(a.activada_en, 'YYYY-MM-DD HH24:MI') AS activada,
             to_char(a.expira_en, 'YYYY-MM-DD') AS expira
      FROM activaciones a WHERE a.licencia_id = $1 ORDER BY a.activada_en`,
